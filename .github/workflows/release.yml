@@ -1,0 +1,32 @@
+name: release
+
+on:
+  workflow_dispatch:
+
+env:
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  release:
+    name:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3.3.0
+      - name: release
+        run: |
+          shopt -s inherit_errexit
+          set -xeEo pipefail
+
+          cp -r "$PWD" /opt/eotk
+          cd /opt/eotk
+
+          platform="ubuntu-20.04"
+          version="$(grep -oP 'version=\d+\.\d+\.\d+' eotk|cut -d= -f2)"
+          release="${version:?}-${platform:?}"
+
+          ! gh release view "${release:?}" --json tagName >/dev/null 2>&1 || exit 2
+
+          ./opt.d/build-"${platform:?}".sh
+          tar -zcf /tmp/eotk.tar.gz .
+          gh release create "$release" /tmp/eotk.tar.gz

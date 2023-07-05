@@ -52,3 +52,6 @@ HiddenServiceVersion %ONION_VERSION%
 
 %%END
 %%ENDIF
+
+Sandbox 1
+HiddenServiceExportCircuitID haproxy

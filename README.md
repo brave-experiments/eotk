@@ -1,3 +1,8 @@
+Fork notes:  
+* Prebuilt releases need to be run from /opt/eotk
+
+---
+
 # The Enterprise Onion Toolkit
 ![banner image](docs.d/hello-onion-text.png)
 

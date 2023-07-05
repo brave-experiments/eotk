@@ -117,7 +117,7 @@ http {
   %%ENDIF
 
   # logs (default)
-  access_log %LOG_DIR%/nginx-access.log;
+  access_log off;
 
   # global settings
   server_tokens off;
@@ -586,16 +586,16 @@ http {
   server {
     %%IF %IS_SOFTMAP%
     %%RANGE I 1 %SOFTMAP_TOR_WORKERS%
-    listen unix:%PROJECT_DIR%/%TOR_WORKER_PREFIX%-%I%.d/port-80.sock;
+    listen unix:%PROJECT_DIR%/%TOR_WORKER_PREFIX%-%I%.d/port-80.sock proxy_protocol;
     %%ENDRANGE
     %%ELSE
-    listen unix:%PROJECT_DIR%/%ONION_DIRNAME%/port-80.sock;
+    listen unix:%PROJECT_DIR%/%ONION_DIRNAME%/port-80.sock proxy_protocol;
     %%ENDIF
 
     %%IF %LOG_SEPARATE%
     access_log %LOG_DIR%/nginx-rdr443-%DNS_DOMAIN%.log;
     %%ELSE
-    access_log %LOG_DIR%/nginx-rdr443.log;
+    access_log off;
     %%ENDIF
 
     # subdomain regexp captures trailing dot, use carefully; does not need "~*"
@@ -644,18 +644,18 @@ http {
     %%RANGE I 1 %SOFTMAP_TOR_WORKERS%
     %%IF not %FORCE_HTTPS%
     # FORCE_HTTPS is not in use, cleartext data may traverse the internet
-    listen unix:%PROJECT_DIR%/%TOR_WORKER_PREFIX%-%I%.d/port-80.sock;
+    listen unix:%PROJECT_DIR%/%TOR_WORKER_PREFIX%-%I%.d/port-80.sock proxy_protocol;
     %%ENDIF
-    listen unix:%PROJECT_DIR%/%TOR_WORKER_PREFIX%-%I%.d/port-443.sock ssl;
+    listen unix:%PROJECT_DIR%/%TOR_WORKER_PREFIX%-%I%.d/port-443.sock ssl proxy_protocol;
     %%ENDRANGE
     %%ELSE
     # hardmap
     # unix sockets; use <ONION_ADDRESS>.d as a naming convention
     %%IF not %FORCE_HTTPS%
     # FORCE_HTTPS is not in use, cleartext data may traverse the internet
-    listen unix:%PROJECT_DIR%/%ONION_DIRNAME%/port-80.sock;
+    listen unix:%PROJECT_DIR%/%ONION_DIRNAME%/port-80.sock proxy_protocol;
     %%ENDIF
-    listen unix:%PROJECT_DIR%/%ONION_DIRNAME%/port-443.sock ssl;
+    listen unix:%PROJECT_DIR%/%ONION_DIRNAME%/port-443.sock ssl proxy_protocol;
     %%ENDIF
 
     %%IF %SSL_CERT_EACH_ONION%
@@ -798,6 +798,7 @@ http {
       %%ENDIF
 
       proxy_set_header X-From-Onion %X_FROM_ONION_VALUE%;
+      proxy_set_header X-Tor-Circuit-Id $proxy_protocol_addr;
       proxy_set_header Host "${servernamesubdomain}%DNS_DOMAIN%";
       proxy_set_header Accept-Encoding "identity";
       proxy_set_header Connection $connection_upgrade; # SSL
