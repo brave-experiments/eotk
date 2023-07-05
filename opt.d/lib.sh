@@ -13,6 +13,11 @@ CustomiseVars() {
 SetupForBuild() {
     test -f "$tool_tarball" || curl -o "$tool_tarball" "$tool_url" || exit 1
     test -f "$tool_sig" || curl -o "$tool_sig" "$tool_sig_url" || exit 1
+    # TODO: a quick hack to prevent breakage after tor switched to signing checksums, instead of tarballs, should ideally refactor
+    if [ "$tool" = "tor" ]; then
+        curl -O "${tool_sig_url%.asc}"
+        shasum -c "${tool_sig%.asc}"
+    fi
     gpg --keyserver "hkp://$keyserver:80" --recv-keys $tool_signing_keys || exit 1
     gpg --verify "$tool_sig" || exit 1
     test -d "$tool_dir" || tar zxf "$tool_tarball" || exit 1
@@ -31,7 +36,7 @@ BuildAndCleanup() {
 
 SetupOpenRestyVars() {
     tool="openresty"
-    tool_version="1.15.8.3"
+    tool_version="1.21.4.1"
     tool_signing_keys="25451EB088460026195BD62CB550E09EA0E98066" # this is the full A0E98066 signature
     tool_url="https://openresty.org/download/$tool-$tool_version.tar.gz"
     tool_sig_url="https://openresty.org/download/$tool-$tool_version.tar.gz.asc"
@@ -60,10 +65,10 @@ ConfigureOpenResty() { # this accepts arguments
 
 SetupTorVars() {
     tool="tor"
-    tool_version="0.4.5.8"
-    tool_signing_keys="6AFEE6D49E92B601 C218525819F78451"
+    tool_version="0.4.7.13"
+    tool_signing_keys="B74417EDDF22AC9F9E90F49142E86A2A11F48D36 514102454D0A87DB0767A1EBBE6A0531C18A9179 2133BC600AB133E1D826D173FE43009C4607B1FB"
     tool_url="https://dist.torproject.org/$tool-$tool_version.tar.gz"
-    tool_sig_url="https://dist.torproject.org/$tool-$tool_version.tar.gz.asc"
+    tool_sig_url="https://dist.torproject.org/$tool-$tool_version.tar.gz.sha256sum.asc"
     tool_link_paths="bin/$tool"
 }
 
