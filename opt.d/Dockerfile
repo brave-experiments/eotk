@@ -11,7 +11,7 @@
 # v1 Alex Haydock <alex@alexhaydock.co.uk>
 # v2 Alec Muffett <alec.muffett@gmail.com>
 
-FROM ubuntu:16.04
+FROM ubuntu:22.04
 
 LABEL maintainer "Alec Muffett <alec.muffett@gmail.com>"
 
