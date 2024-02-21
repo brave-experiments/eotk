@@ -9,12 +9,10 @@ env:
 jobs:
   release:
     name:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: checkout
         uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
-      - name: prep
-        run: sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends libseccomp-dev
       - name: release
         run: |
           shopt -s inherit_errexit
@@ -23,7 +21,7 @@ jobs:
           cp -r "$PWD" /opt/eotk
           cd /opt/eotk
 
-          platform="ubuntu-20.04"
+          platform="ubuntu-22.04"
           version="$(grep -oP 'version=\d+\.\d+\.\d+' eotk|cut -d= -f2)"
           release="${version:?}-${platform:?}"
 
