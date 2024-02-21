@@ -14,7 +14,6 @@ libevent-dev
 libpcre3-dev
 libseccomp-dev
 libssl-dev
-libssl1.1
 make
 perl
 zlib1g-dev
