@@ -19,7 +19,7 @@ prog=`basename $0`
 self=$EOTK_HOME/$prog
 
 # meta
-version=1.6.3
+version=1.6.4
 
 # set project directory; this path is hard-replicated elsewhere
 project_dir=$EOTK_HOME/projects.d
@@ -45,7 +45,7 @@ init=eotk-init.sh
 housekeeping=eotk-housekeeping.sh
 
 # log retention
-log_retain=8
+log_retain=1
 
 # hostname for log purposes
 hostname=`uname -n`
