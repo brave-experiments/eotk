@@ -19,7 +19,7 @@ prog=`basename $0`
 self=$EOTK_HOME/$prog
 
 # meta
-version=1.6.4
+version=1.6.5
 
 # set project directory; this path is hard-replicated elsewhere
 project_dir=$EOTK_HOME/projects.d
