@@ -35,8 +35,6 @@ EOTK_USER=%USER% # hardcode owner of the directory & files
 EOTK_INIT_LOG=/tmp/eotk-init.log
 EOTK_OB_DELAY=90 # backgrounded pause
 
-rm -f "$EOTK_INIT_LOG"
-
 exec </dev/null >>$EOTK_INIT_LOG 2>&1
 
 date # help with debugging

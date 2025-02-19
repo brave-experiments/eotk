@@ -3,6 +3,11 @@ name: release
 on:
   workflow_dispatch:
 
+permissions:
+  id-token: write
+  contents: write
+  attestations: write
+
 env:
   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -12,21 +17,37 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: checkout
-        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
-      - name: release
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: build
         run: |
           shopt -s inherit_errexit
           set -xeEo pipefail
 
-          cp -r "$PWD" /opt/eotk
-          cd /opt/eotk
-
           platform="ubuntu-22.04"
           version="$(grep -oP 'version=\d+\.\d+\.\d+' eotk|cut -d= -f2)"
           release="${version:?}-${platform:?}"
+          echo "release=${release:?}" >>"${GITHUB_ENV:?}"
 
-          ! gh release view "${release:?}" --json tagName >/dev/null 2>&1 || exit 2
+          ! gh release view "$release" --json tagName >/dev/null 2>&1 || exit 2
 
-          ./opt.d/build-"${platform:?}".sh
-          tar -zcf /tmp/eotk.tar.gz .
-          gh release create "$release" /tmp/eotk.tar.gz
+          cp -r "${PWD:?}" /opt/eotk
+          (cd /opt/eotk && ./opt.d/build-"${platform:?}".sh)
+          tar -zcf eotk.tar.gz /opt/eotk
+          sha256sum eotk.tar.gz >eotk.tar.gz.sha256
+      - name: attest provenance
+        uses: actions/attest-build-provenance@520d128f165991a6c774bcb264f323e3d70747f4 # v2.2.0
+        with:
+          subject-path: eotk.tar.gz
+      - name: generate sbom
+        uses: anchore/sbom-action@f325610c9f50a54015d37c8d16cb3b0e2c8f4de0 # v0.18.0
+        with:
+          path: /opt/eotk
+          output-file: sbom.spdx
+      - name: attest sbom
+        uses: actions/attest-sbom@115c3be05ff3974bcbd596578934b3f9ce39bf68 # v2.2.0
+        with:
+          subject-path: eotk.tar.gz
+          sbom-path: sbom.spdx
+      - name: release
+        run: |
+          gh release create "${release:?}" eotk.tar.gz eotk.tar.gz.sha256 sbom.spdx
