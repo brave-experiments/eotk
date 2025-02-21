@@ -54,6 +54,4 @@ jobs:
           subject-path: 'eotk.spdx, eotk.tar.gz, eotk.tar.gz.sha256'
       - name: release
         run: |
-          #FIXME: change before merging
-          #gh release create "${release:?}" eotk.spdx eotk.tar.gz eotk.tar.gz.sha256
-          echo release
+          gh release create "${release:?}" eotk.spdx eotk.tar.gz eotk.tar.gz.sha256
