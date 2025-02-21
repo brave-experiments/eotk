@@ -51,10 +51,7 @@ jobs:
       - name: attest provenance
         uses: actions/attest-build-provenance@520d128f165991a6c774bcb264f323e3d70747f4 # v2.2.0
         with:
-          subject-path:
-            - eotk.spdx
-            - eotk.tar.gz
-            - eotk.tar.gz.sha256
+          subject-path: 'eotk.spdx, eotk.tar.gz, eotk.tar.gz.sha256'
       - name: release
         run: |
           #FIXME: change before merging
