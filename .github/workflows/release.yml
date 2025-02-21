@@ -10,12 +10,11 @@ permissions:
 
 env:
   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  platform: 'ubuntu-22.04'
 
 jobs:
   release:
     name:
-    runs-on: ${{ env.platform }}
+    runs-on: ubuntu-22.04
     steps:
       - name: checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -26,6 +25,7 @@ jobs:
           set -xeEo pipefail
 
           # Set up inputs
+          platform="ubuntu-22.04"
           version="$(grep -oP 'version=\d+\.\d+\.\d+' eotk|cut -d= -f2)"
           release="${version:?}-${platform:?}"
           echo "release=${release:?}" >>"${GITHUB_ENV:?}"
@@ -58,5 +58,5 @@ jobs:
       - name: release
         run: |
           #FIXME: change before merging
-          #gh release create "${release:?}" eotk.tar.gz eotk.tar.gz.sha256 eotk.spdx
+          #gh release create "${release:?}" eotk.spdx eotk.tar.gz eotk.tar.gz.sha256
           echo release
