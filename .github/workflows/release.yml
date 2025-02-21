@@ -20,34 +20,38 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: build
         run: |
+          # Fail fast, be verbose
           shopt -s inherit_errexit
           set -xeEo pipefail
 
+          # Set up inputs
           platform="ubuntu-22.04"
           version="$(grep -oP 'version=\d+\.\d+\.\d+' eotk|cut -d= -f2)"
           release="${version:?}-${platform:?}"
           echo "release=${release:?}" >>"${GITHUB_ENV:?}"
 
+          # Fail if the release already exists
           ! gh release view "$release" --json tagName >/dev/null 2>&1 || exit 2
 
+          # Generate outputs
           cp -r "${PWD:?}" /opt/eotk
-          (cd /opt/eotk && ./opt.d/build-"${platform:?}".sh)
+          (cd /opt/eotk && ./opt.d/build-"$platform".sh)
           tar -zcf eotk.tar.gz /opt/eotk
           sha256sum eotk.tar.gz >eotk.tar.gz.sha256
-      - name: attest provenance
-        uses: actions/attest-build-provenance@520d128f165991a6c774bcb264f323e3d70747f4 # v2.2.0
-        with:
-          subject-path: eotk.tar.gz
       - name: generate sbom
         uses: anchore/sbom-action@f325610c9f50a54015d37c8d16cb3b0e2c8f4de0 # v0.18.0
         with:
           path: /opt/eotk
-          output-file: sbom.spdx
+          output-file: eotk.spdx
       - name: attest sbom
         uses: actions/attest-sbom@115c3be05ff3974bcbd596578934b3f9ce39bf68 # v2.2.0
         with:
           subject-path: eotk.tar.gz
-          sbom-path: sbom.spdx
+          sbom-path: eotk.spdx
+      - name: attest provenance
+        uses: actions/attest-build-provenance@520d128f165991a6c774bcb264f323e3d70747f4 # v2.2.0
+        with:
+          subject-path: 'eotk.spdx, eotk.tar.gz, eotk.tar.gz.sha256'
       - name: release
         run: |
-          gh release create "${release:?}" eotk.tar.gz eotk.tar.gz.sha256 sbom.spdx
+          gh release create "${release:?}" eotk.spdx eotk.tar.gz eotk.tar.gz.sha256
