@@ -19,7 +19,8 @@ prog=`basename $0`
 self=$EOTK_HOME/$prog
 
 # meta
-version=1.6.7
+# FIXME: bump before merging
+version=1.6.8
 
 # set project directory; this path is hard-replicated elsewhere
 project_dir=$EOTK_HOME/projects.d
